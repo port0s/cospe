@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+
+# biblioteca em shell
+
+# lista assossiativa simples (são similares aos dicionários de Python chave-valor)
+# sempre inicia com 0, então: primeira string = 0.
+
+ART=(
+    "dinossarro102 (Animação)"
+    "decart.it"
+    "moeai.art"
+    "fabiocuffari"
+    "drew.nori"
+    "ghoulish.grl"
+    "drawmedefault"
+    "artbybri_"
+    "simz.art"
+    "courtney_art"
+    "resaksgraffiti"
+    "guilhermedesenhando (ART)"
+    "izadoart (ART)"
+    "brunofarias1717 (ART)"
+    "h0rro_g4m3rr.8 (ART)"
+    "mariazontes (ART)"
+    "lauratodobom (ART)"
+    "minha_arte_brasil (ART)"
+    "artisis (ART)"
+    "pauloblank0 (ART)"
+    "atevaldonovais (ART)"
+    "desenhonocabelo (ART)"
+    "keith.nunes (ART)"
+    "diciomar.filho (ART)"
+)
+
+SCIENCE=(
+    "jacque_ortegab"
+    "giuliana_mafra"
+    "gabiimello | ameninadamatematica (Matemática)"
+    "explorando.fatos (Lívia Souza)"
+    "purafisica"
+    "notprimak"
+    "figuered0o"
+    "yagostephano"
+    "cienciaecuriosidades"
+    "marcelocalopsita"
+    "biomesquita"
+    "biologohenrique"
+    "malujunco"
+    "thelymphologist"
+    "efarsas"
+)
+
+HUMOR=(
+    "silsugiura"
+    "likeamika"
+    "manualdoaristeu"
+    "mariodecarvalho83"
+    "tinelaonaarea"
+    "stifleermaster2"
+    "terceirao_qnja"
+    "chitaradelakostaoficial"
+    "biancaevelen"
+    "marcelinhomesmo"
+    "negaobl.moments"
+    "jucelinokubicast"
+    "edgama"
+    "apeidonadotiktoknovo"
+)
+
+VIBES=(
+    "theonlyvibes_"
+    "asyavlade"
+    "vibeworld_"
+    "neil.james"
+    "drk.vibe"
+    "04h.50h"
+    "multiversomistico"
+    "themagichours"
+    "_vibeworld"
+    "vibe"
+    "vibesrt"
+    "idoesv"
+    "ecom.ajwadv2"
+    "planet_tumblr"
+    "vibeworld_"
+    "_lifevibe"
+    "drk.vibe"
+    "vibrant.vibes.world"
+    "vibeplanett_"
+    "arroba.dark"
+    "isyourvibes"
+)
+
+FOOD=(
+    "amandabaristaa (Barista)"
+    "micheleykegaya"
+    "marcellafrezende"
+    "connhcruz"
+    "lucydiamondshow"
+    "deborahyowa"
+)
+
+MUSIC=(
+    "melinamellemusic | mellebabymusic"
+    "djchapeuzinho (DJ)"
+    "larasilvan (DJ)"
+    "djlarissacerqueira (DJ)"
+    "barbara.labres (DJ)"
+    "bstdnl (Guitarra)"
+    "ocaradometal (Metal)"
+    "jennyloveshiphop (Edição)"
+    "dutra_sonoplasta (Sonoplasta)"
+    "rapincenabrasil"
+    "charlessantostrap"
+    "casali.oficial (cantora)"
+    "hillary.praia (Cantora)"
+    "gabimartinscantora (Cantora)"
+    "claferrarii (cantora)"
+    "anitta"
+)
+
+HISTORY=(
+    "lilianfarrish (Moda)"
+    "shoshmaria (História, Hoje, Moda)"
+    "marciavintage (História, Moda)"
+    "ericafeitosag (História, Maquiagem)"
+    "katyushaww2 (RI, WW2)"
+    "pullthelever.kronk (RI)"
+    "petit_journal_ (RI)"
+)
+
+VIDEOS=(
+    "juliavsx (Edição)"
+    "anamariagw (Edição)"
+    "artecomste (Edição)"
+    "respect._videos._ (Edição)"
+    "f_i_l_m_e_s_ (Edição)"
+    "maxvalarezo (Edição)"
+    "snow_w2 (Edição)"
+    "tiago_mint | goldotiago"
+    "lifeh.s (Edição)"
+)
+
+ANIMALS=(
+    "marybatis1 (Dogs)"
+    "huskyquoi (Dogs)"
+    "pitbulll081 (Dogs)"
+    "thatlittlepuff (Gatos)"
+    "jade_kalin (Cobra)"
+    "donnakristina13 (Cobra)"
+    "dogfans17 (Dogs)"
+)
+
+TK=(
+   "${ANIMALS[@]}"
+   "${ART[@]}"
+   "${FOOD[@]}"
+   "${HISTORY[@]}"
+   "${HUMOR[@]}"
+   "${MUSIC[@]}"
+   "${SCIENCE[@]}"
+   "${VIBES[@]}"
+   "${VIDEOS[@]}"
+)
+
+
+function _show_tk() {
+    for id in "${TK[@]}"; do
+        printf "%s\n" "${id}"
+    done
+}

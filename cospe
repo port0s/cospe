@@ -1,0 +1,205 @@
+#!/usr/bin/env bash
+
+THIS_FILE="${0}" # este arquivo
+# TK_FILE="${HOME}/Documents/0/cospe/tiktok"
+# YT_FILE="${HOME}/Documents/0/cospe/youtube_channel_name_1"
+TK_FILE="./tiktok"
+#YT_FILE="./youtube_channel_name_3"
+YT_FILE="./youtube_channel_name"
+
+function _edit_this_file() {
+    sed -i "${1}" "${THIS_FILE}"
+}
+
+# Dependency check
+function _dep_ck () {
+  local Dep="${@}"
+
+	for Dep; do
+        ! ( command -v "${Dep}" 1>&- ) && printf "%s não está presente. Por favor, instale.\n" "${Dep}" && exit 2
+	done
+
+    _edit_this_file "s/^\(_dep_ck.*\)$/#\1/" && return 0
+	# unset Dep
+}
+
+_dep_ck "sed" "fzf" "xclip" "xdg-open" "grep" "cut"
+
+
+TK=(
+    %%TK%%
+)
+
+# ID NAME
+HT=(
+    %%HT%%
+)
+
+TR=(
+    %%TR%%
+)
+
+function _list() {
+    [[ "${1}" = "TK" ]] && for name in "${TK[@]}"; do printf "${name}\n"; done
+
+    # NOT SHOW ID, SHOW NAME
+    [[ "${1}" = "HT" ]] && for name in "${HT[@]}"; do printf "${name#* }\n"; done
+    [[ "${1}" = "TR" ]] && for name in "${TR[@]}"; do printf "${name#* }\n"; done
+}
+
+function _get_yt() {
+    local OPTION="${1}"
+    local FILE="${2}" # local FILE="./youtube_channel_name"
+
+    [[ "${OPTION}" = "TR" ]] && local SHOW="_show_tr"
+    [[ "${OPTION}" = "HT" ]] && local SHOW="_show_ht"
+
+    USER="$(source "${FILE}" && "${SHOW}" | fzf)" && \
+    USER="$(source "${FILE}" && _get_id_name "${USER%% (*}" "${FILE}")"
+
+    USER="${USER%% (*}"
+    USER="${USER//\/\//\\/\\/}"
+    USER="${USER//\:/\\:}"
+    USER="${USER//\&/\\&}"
+    USER="${USER//\[/\\[}"
+    USER="${USER//\]/\\]}"
+
+    # USER="$(source "${FILE}" && _show_name "${OPTION}" | fzf)" && \
+    # USER="$(source "${FILE}" && _get_id_name "${USER}" "${FILE}")"
+}
+
+function _get_tk() {
+    local FILE="${1}" # local FILE="./tiktok"
+    USER="$(source "${FILE}" && _show_tk | fzf)"
+}
+
+function _select_user() {
+    [[ "${1}" = "TK" ]] && _get_tk "${2}" || _get_yt "${1}" "${2}"
+    [[ -z "${USER}" ]] && echo "User not select." && exit 1
+
+    [[ "${1}" = "TK" ]] && [[ "${USER}" =~ "|" ]] && USER=${USER##*| } && USER="${USER%% *}" || [[ "${1}" = "TK" ]] && USER="${USER%% *}"
+}
+
+function _check_stack(){
+    [[ "${1}" = TK ]] && [[ "${TK}" = %%TK%% ]] && return 1 || \
+        [[ "${1}" = HT ]] && [[ "${HT}" = %%HT%% ]] && return 1 || \
+        [[ "${1}" = TR ]] && [[ "${TR}" = %%TR%% ]] && return 1 || return 0
+}
+
+function _set() {
+    [[ "${OPTION}" = "TK" ]] && _select_user "${OPTION}" "${TK_FILE}"
+    [[ "${OPTION}" = "HT" || "${OPTION}" = "TR" ]] && _select_user "${OPTION}" "${YT_FILE}"
+
+    _check_stack "${OPTION}" # TK HT TR
+    [[ "${?}" -eq 1 ]] && _edit_this_file "s/^\s\{0,4\}%%${OPTION}%%/    \"${USER}\"\n    %%${OPTION}%%/" && exit 0
+
+    read -p "Deseja escolher a posição (y/n): " SET_POSITION
+
+    [[ "${SET_POSITION,,}" == @(n|não|nao|not|''|' '|"") ]] && _edit_this_file "s/^\s\{0,4\}%%${OPTION}%%/    \"${USER}\"\n    %%${OPTION}%%/" && exit 0
+
+    LOCAL_USER="$( _list "${OPTION}" | fzf )"
+    [[ -z "${LOCAL_USER}" ]] && echo "Local user not select." && exit 1
+
+    read -p "LOCAL, UP or DOWN: " EDIT
+
+    [[ -z "${EDIT,,}" ]] && echo "Posição não escohida. Nome será colocado ao final do array." && _edit_this_file "s/^\s\{0,4\}%%${OPTION}%%/    \"${USER}\"\n    %%${OPTION}%%/" && exit 0
+    [[ "${EDIT,,}" == @(l|local) ]] && _edit_this_file "s/\".*${LOCAL_USER}\"/\"${USER}\"/" "${THIS_FILE}" && exit 0
+    [[ "${EDIT,,}" == @(u|up|a|alto) ]] && _edit_this_file "s/\"\(.*${LOCAL_USER}\)\"/\"${USER}\"\n    \"\1\"/" "${THIS_FILE}" && exit 0
+    [[ "${EDIT,,}" == @(d|down|b|baixo|"") ]] && _edit_this_file "s/\"\(.*${LOCAL_USER}\)\"/\"\1\"\n    \"${USER}\"/" "${THIS_FILE}" && exit 0
+}
+
+function _menu() {
+    # Criação da lista de opções
+    OPTIONS="TK HT TR sair..."
+
+    # Uso da variável prompt
+    PS3="Digite o número de sua opção (1-4): "
+
+    # Comando select
+    select OPTION in $OPTIONS; do
+        [[ $REPLY -eq 4 ]] && exit 0
+        [[ $REPLY -ge 1 && $REPLY -le 3 ]] && break
+    done
+
+    _set "${OPTION}"
+}
+
+
+function _get() {
+    _check_stack "${2}" # Tk HT TR # "${1}" # %%TK%% %%HT%% %%TR%%
+    [[ "${?}" -eq 1 ]] && printf "Pilha vazia.\n" && exit 1
+
+    local TK_LINK="https://tiktok.com/@"
+    local YT_CHANNEL_LINK="https://youtube.com/channel/"
+    local YT_SEARCH_LINK="https://youtube.com/results?search_query="
+
+    [[ "${2}" = "HT" || "${2}" = "TR" ]] && local ID="${1%% *}" && local NAME="${1#* }" || local NAME="${1}"
+
+    local EDIT="${1%% (*}"
+    EDIT="${EDIT//\/\//\\/\\/}"
+    EDIT="${EDIT//\:/\\:}"
+    EDIT="${EDIT//\&/\\&}"
+    EDIT="${EDIT//\[/\\[}"
+    EDIT="${EDIT//\]/\\]}"
+
+    # Salva "NAME" para área de tranferência do sistema e
+    # apaga "NAME", no caso de TK, ou
+    # apaga "ID NAME", no caso de YT
+    # xclip -selection clipboard <<< "${NAME}" && _edit_this_file "/${1}/d"
+    xclip -selection clipboard <<< "${NAME}" && _edit_this_file "/${EDIT}/d"
+
+    [[ "${2}" = "TK" ]] && xdg-open "${TK_LINK}${NAME}" 1>&- && exit 0
+
+    # YT: Abre BUSCA ao canal
+    [[ "${2}" = "HT" || "${2}" = "TR" ]] && xdg-open "${YT_SEARCH_LINK}${NAME// /+}" 1>&- && exit 0
+
+    # YT: Abre browser DIRETAMENTE no canal
+    [[ "${2}" = "HT" || "${2}" = "TR" ]] && xdg-open "${YT_CHANNEL_LINK}${ID}" 1>&- && exit 0
+}
+
+function _help() {
+    printf "
+Usage:
+
+        cospe [options]
+
+Basic Options:
+
+        h, -h, --help                       Exiba esta mensagem.
+        c, config                           Adentre ao arquivo de configuração.
+
+Options:
+        t                       cospe TK
+        h                       cospe HT
+        r                       cospe TR
+
+        ltk                     List TK
+        lht                     List HT
+        ltr                     List TR
+
+        s                       Set ALL
+"
+}
+
+case "${1}" in
+    t) _get "${TK}" "TK"
+        ;;
+    h) _get "${HT}" "HT"
+        ;;
+    r) _get "${TR}" "TR"
+        ;;
+    c | config ) "${EDITOR}" "${THIS_FILE}"
+        ;;
+    s | set | a | add | append ) _menu
+        ;;
+    ltk) _list "TK"
+        ;;
+    lht) _list "HT"
+        ;;
+    ltr) _list "TR"
+        ;;
+    h | *) _help
+    ;;
+esac
+
+exit 0
